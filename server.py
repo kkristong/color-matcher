@@ -56,10 +56,12 @@ def generate_colors():
 
     if not desc:
         return jsonify({"error": "Please provide a color description."}), 400
-    if not DEEPSEEK_KEY:
+    # Use env key, or fallback to user-provided key from request
+    api_key = DEEPSEEK_KEY or data.get("api_key", "")
+    if not api_key:
         return jsonify({
-            "error": "Set DEEPSEEK_API_KEY in .env",
-            "hint": "Get your key at https://platform.deepseek.com/api_keys"
+            "error": "Need DeepSeek API key",
+            "hint": "Get a free key at https://platform.deepseek.com/api_keys"
         }), 401
 
     # Detect language to enforce consistency
@@ -79,7 +81,7 @@ def generate_colors():
     try:
         resp = requests.post(
             DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json=payload,
             timeout=60,
         )
