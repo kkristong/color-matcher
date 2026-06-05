@@ -288,16 +288,6 @@ body {
     <h1>Color Matcher</h1>
   </header>
 
-  <!-- Key Setup -->
-  <div id="keySetup" style="display:none; margin-bottom: 16px; animation: slideUp 0.4s ease-out;">
-    <div class="search-shell">
-      <input id="keyInput" type="password"
-             placeholder="Paste your DeepSeek API key... (free at platform.deepseek.com)"
-             autocomplete="off">
-      <button class="search-btn" onclick="saveKey()" style="background:#777;">Save Key</button>
-    </div>
-  </div>
-
   <div class="search-stage slide-up">
     <div class="search-shell">
       <input id="searchInput" type="text"
@@ -344,23 +334,7 @@ const presetLabel = $('presetLabel');
 const toastsEl = $('toasts');
 
 searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
-initKey();
 fetchPresets();
-
-/* ── API Key Management ── */
-function getKey() { return localStorage.getItem('cm-key') || ''; }
-function initKey() {
-  if (!getKey()) { $('keySetup').style.display = 'block'; }
-  $('keyInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
-}
-function saveKey() {
-  const val = $('keyInput').value.trim();
-  if (!val) return;
-  localStorage.setItem('cm-key', val);
-  $('keySetup').style.display = 'none';
-  toast('Key Saved');
-  $('searchInput').focus();
-}
 
 async function fetchPresets() {
   const fallback = [
@@ -419,7 +393,7 @@ async function doSearch() {
     const res = await fetch('/api/generate-colors', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({description: desc, api_key: getKey()}),
+      body: JSON.stringify({description: desc}),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Generation Failed');
