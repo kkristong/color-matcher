@@ -15,7 +15,8 @@ load_dotenv()
 
 # ── Config ──────────────────────────────────────────────
 API_KEY = os.getenv("API_KEY")
-API_URL = "https://api.deepseek.com/v1/chat/completions"
+API_URL = os.getenv("API_URL", "https://api.deepseek.com/v1/chat/completions")
+MODEL = os.getenv("API_MODEL", "deepseek-chat")
 
 SYSTEM_PROMPT = """You are a professional color designer. Given a text description, generate a harmonious color palette.
 
@@ -57,8 +58,8 @@ def generate_colors():
         return jsonify({"error": "Please provide a color description."}), 400
     if not API_KEY:
         return jsonify({
-            "error": "Set API_KEY in .env file",
-            "hint": "Get a free key at https://platform.deepseek.com/api_keys"
+            "error": "API key not configured",
+            "hint": "Get a key from your API provider"
         }), 401
 
     # Detect language to enforce consistency
@@ -66,7 +67,7 @@ def generate_colors():
     lang_note = "CRITICAL: output ALL text in Simplified Chinese (简体中文, NOT traditional 繁体)." if has_cjk else "CRITICAL: output ALL text in English. Do NOT use Japanese, French, Korean, or any other language."
 
     payload = {
-        "model": "deepseek-chat",
+        "model": MODEL,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f'{lang_note}\n\nGenerate a color palette for: "{desc}"'},
@@ -89,7 +90,7 @@ def generate_colors():
             if resp.status_code == 401:
                 hint = "Please check your API_KEY."
             elif resp.status_code == 402:
-                hint = "Your DeepSeek account may be out of credits."
+                hint = "Your API account may be out of credits."
             return jsonify({"error": f"API error {resp.status_code}: {err}", "hint": hint}), resp.status_code
 
         result = resp.json()
@@ -148,5 +149,5 @@ if __name__ == "__main__":
     if not API_KEY:
         print("⚠️  Set API_KEY in .env file\n")
         print("   cp .env.example .env")
-        print("   Get a key at https://platform.deepseek.com/api_keys\n")
+        print("   Set API_KEY and API_URL in .env\n")
     app.run(host="0.0.0.0", port=port, debug=False)
