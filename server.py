@@ -1,6 +1,5 @@
 """
-Color Matcher — AI-Powered Color Palette Generator
-Flask API server.
+Color Matcher — palette generator.
 """
 
 import json
