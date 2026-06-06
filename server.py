@@ -1,6 +1,6 @@
 """
 Color Matcher — AI-Powered Color Palette Generator
-Flask + DeepSeek API (OpenAI-compatible, no proxy needed).
+Flask API server.
 """
 
 import json
@@ -15,8 +15,8 @@ import requests
 load_dotenv()
 
 # ── Config ──────────────────────────────────────────────
-DEEPSEEK_KEY = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+API_KEY = os.getenv("API_KEY")
+API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 SYSTEM_PROMPT = """You are a professional color designer. Given a text description, generate a harmonious color palette.
 
@@ -56,9 +56,9 @@ def generate_colors():
 
     if not desc:
         return jsonify({"error": "Please provide a color description."}), 400
-    if not DEEPSEEK_KEY:
+    if not API_KEY:
         return jsonify({
-            "error": "Set DEEPSEEK_API_KEY in .env file",
+            "error": "Set API_KEY in .env file",
             "hint": "Get a free key at https://platform.deepseek.com/api_keys"
         }), 401
 
@@ -78,8 +78,8 @@ def generate_colors():
 
     try:
         resp = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
+            API_URL,
+            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
             json=payload,
             timeout=60,
         )
@@ -88,7 +88,7 @@ def generate_colors():
             err = resp.text[:400]
             hint = ""
             if resp.status_code == 401:
-                hint = "Please check your DEEPSEEK_API_KEY."
+                hint = "Please check your API_KEY."
             elif resp.status_code == 402:
                 hint = "Your DeepSeek account may be out of credits."
             return jsonify({"error": f"API error {resp.status_code}: {err}", "hint": hint}), resp.status_code
@@ -143,10 +143,11 @@ def presets():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
     print("=" * 50)
-    print("🎨  Color Matcher (DeepSeek)")
+    print("🎨  Color Matcher")
     print(f"   http://localhost:{port}")
-    print("   国内直连 · 无需代理")
     print("=" * 50)
-    if not DEEPSEEK_KEY:
-        print("⚠️  请在 .env 中设置 DEEPSEEK_API_KEY\n")
+    if not API_KEY:
+        print("⚠️  Set API_KEY in .env file\n")
+        print("   cp .env.example .env")
+        print("   Get a key at https://platform.deepseek.com/api_keys\n")
     app.run(host="0.0.0.0", port=port, debug=False)
