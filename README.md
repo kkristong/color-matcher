@@ -18,6 +18,12 @@ python server.py            # open http://localhost:8080
 - Local history (8 recent palettes)
 - Multi-language presets
 
+## How it works
+
+The backend calls an OpenAI-compatible API to turn text descriptions into color palettes. Set your API key in `.env` and put your endpoint URL in `server.py`.
+
+Any OpenAI-compatible provider works — just configure `API_KEY` and `API_URL`.
+
 ## Tech
 
 - Python Flask
